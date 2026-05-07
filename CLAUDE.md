@@ -5,7 +5,7 @@ Applicazione web per la gestione personale secondo la metodologia **GTD (Getting
 Consultabile da desktop e mobile. Accesso protetto tramite autenticazione.
 
 ## Stack
-- **Next.js 16** (App Router, `src/` directory) + TypeScript
+- **Next.js 16** (App Router, `src/` directory) + TypeScript — usa `src/proxy.ts` (non middleware.ts, deprecato in v16)
 - **Tailwind CSS v4**
 - **Supabase** — PostgreSQL database + Auth (magic link)
 - **Vercel** — deploy
