@@ -1,6 +1,10 @@
 import LoginForm from './LoginForm'
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
   return (
     <div
       className="min-h-dvh flex items-center justify-center p-4"
