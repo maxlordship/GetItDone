@@ -1,0 +1,111 @@
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { Plus, ChevronRight, Calendar } from 'lucide-react'
+import type { Project, Area } from '@/types/database'
+import AddProjectModal from './AddProjectModal'
+
+interface ProjectWithArea extends Project {
+  areas?: { name: string; color: string } | null
+}
+
+export default function ProjectsList({ initialProjects, areas }: { initialProjects: ProjectWithArea[], areas: Area[] }) {
+  const [projects, setProjects] = useState(initialProjects)
+  const [showAdd, setShowAdd] = useState(false)
+  const [areaFilter, setAreaFilter] = useState('all')
+
+  function handleAdded(project: ProjectWithArea) {
+    setProjects((prev) => [project, ...prev])
+    setShowAdd(false)
+  }
+
+  const filtered = areaFilter === 'all' ? projects : projects.filter((p) => p.area_id === areaFilter)
+
+  return (
+    <div>
+      {/* Filtri area + bottone aggiungi */}
+      <div className="flex items-center gap-2 px-4 md:px-6 py-3 border-b overflow-x-auto scrollbar-none" style={{ borderColor: 'var(--border)' }}>
+        <button
+          onClick={() => setAreaFilter('all')}
+          className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border"
+          style={{
+            background: areaFilter === 'all' ? 'var(--foreground)' : 'var(--surface)',
+            borderColor: areaFilter === 'all' ? 'var(--foreground)' : 'var(--border)',
+            color: areaFilter === 'all' ? '#fff' : 'var(--muted)',
+          }}
+        >
+          Tutti
+        </button>
+        {areas.map((area) => (
+          <button
+            key={area.id}
+            onClick={() => setAreaFilter(area.id)}
+            className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-1.5"
+            style={{
+              background: areaFilter === area.id ? area.color + '20' : 'var(--surface)',
+              borderColor: areaFilter === area.id ? area.color : 'var(--border)',
+              color: areaFilter === area.id ? area.color : 'var(--muted)',
+            }}
+          >
+            <span className="w-2 h-2 rounded-full" style={{ background: area.color }} />
+            {area.name}
+          </button>
+        ))}
+        <button
+          onClick={() => setShowAdd(true)}
+          className="shrink-0 ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+          style={{ background: 'var(--accent)', color: '#fff' }}
+        >
+          <Plus size={13} />
+          Nuovo
+        </button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-4xl mb-3">📁</div>
+          <p className="font-medium" style={{ color: 'var(--foreground)' }}>Nessun progetto</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>Crea il tuo primo progetto</p>
+        </div>
+      ) : (
+        <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
+          {filtered.map((project) => (
+            <li
+              key={project.id}
+              className="flex items-center gap-3 px-4 py-3.5"
+              style={{ background: 'var(--surface)' }}
+            >
+              {project.areas && (
+                <div className="w-2 h-10 rounded-full shrink-0" style={{ background: project.areas.color }} />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{project.title}</p>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {project.areas && (
+                    <span className="text-xs" style={{ color: project.areas.color }}>{project.areas.name}</span>
+                  )}
+                  {project.due_date && (
+                    <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--muted)' }}>
+                      <Calendar size={11} />
+                      {new Date(project.due_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <ChevronRight size={16} style={{ color: 'var(--border)' }} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {showAdd && (
+        <AddProjectModal
+          areas={areas}
+          onDone={handleAdded}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
+    </div>
+  )
+}
