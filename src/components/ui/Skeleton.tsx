@@ -8,23 +8,20 @@ export function SkeletonLine({ width = 'full', height = 4 }: { width?: string | 
   )
 }
 
-export function SkeletonListItem() {
-  return (
-    <div className="flex items-start gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-      <div className="w-5 h-5 rounded-full mt-0.5 animate-pulse shrink-0" style={{ background: 'var(--border)' }} />
-      <div className="flex-1 space-y-2">
-        <SkeletonLine width={Math.floor(Math.random() * 30 + 50)} />
-        <SkeletonLine width={Math.floor(Math.random() * 20 + 20)} height={3} />
-      </div>
-    </div>
-  )
-}
+const LINE_WIDTHS = [70, 55, 80, 60, 75, 50, 65]
+const SUBLINE_WIDTHS = [35, 25, 40, 30, 45, 28, 38]
 
 export function SkeletonList({ rows = 6 }: { rows?: number }) {
   return (
     <div>
       {Array.from({ length: rows }).map((_, i) => (
-        <SkeletonListItem key={i} />
+        <div key={i} className="flex items-start gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+          <div className="w-5 h-5 rounded-full mt-0.5 animate-pulse shrink-0" style={{ background: 'var(--border)' }} />
+          <div className="flex-1 space-y-2">
+            <SkeletonLine width={LINE_WIDTHS[i % LINE_WIDTHS.length]} />
+            <SkeletonLine width={SUBLINE_WIDTHS[i % SUBLINE_WIDTHS.length]} height={3} />
+          </div>
+        </div>
       ))}
     </div>
   )
