@@ -1,18 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Trash2, ArrowRight } from 'lucide-react'
 import type { InboxItem } from '@/types/database'
 import ProcessModal from './ProcessModal'
+import { SkeletonList } from '@/components/ui/Skeleton'
 
-export default function InboxList({ initialItems }: { initialItems: InboxItem[] }) {
-  const [items, setItems] = useState(initialItems)
+export default function InboxList() {
+  const [items, setItems] = useState<InboxItem[]>([])
+  const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState<InboxItem | null>(null)
 
+  useEffect(() => {
+    createClient()
+      .from('inbox')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setItems(data ?? [])
+        setLoading(false)
+      })
+  }, [])
+
   async function handleDelete(id: string) {
-    const supabase = createClient()
-    await supabase.from('inbox').delete().eq('id', id)
+    await createClient().from('inbox').delete().eq('id', id)
     setItems((prev) => prev.filter((i) => i.id !== id))
   }
 
@@ -20,6 +32,8 @@ export default function InboxList({ initialItems }: { initialItems: InboxItem[] 
     setItems((prev) => prev.filter((i) => i.id !== id))
     setProcessing(null)
   }
+
+  if (loading) return <SkeletonList rows={7} />
 
   if (items.length === 0) {
     return (
@@ -35,15 +49,18 @@ export default function InboxList({ initialItems }: { initialItems: InboxItem[] 
 
   return (
     <>
-      <ul className="divide-y px-0 md:px-4 md:py-2" style={{ borderColor: 'var(--border)' }}>
+      <p className="px-4 pt-3 pb-1 text-sm" style={{ color: 'var(--muted)' }}>
+        {items.length} {items.length === 1 ? 'elemento' : 'elementi'} da processare
+      </p>
+      <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
         {items.map((item) => (
           <li
             key={item.id}
-            className="flex items-start gap-3 px-4 py-3 md:rounded-xl md:px-4 group"
+            className="flex items-start gap-3 px-4 py-3 group"
             style={{ background: 'var(--surface)' }}
           >
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                 {item.title}
               </p>
               {item.notes && (
@@ -58,7 +75,7 @@ export default function InboxList({ initialItems }: { initialItems: InboxItem[] 
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => setProcessing(item)}
-                className="p-2 rounded-lg text-xs font-medium flex items-center gap-1 transition-colors"
+                className="p-2 rounded-lg transition-colors"
                 style={{ color: 'var(--accent)' }}
                 title="Processa"
               >

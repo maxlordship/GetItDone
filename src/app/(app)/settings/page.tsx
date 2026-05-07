@@ -1,15 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
 import PageHeader from '@/components/layout/PageHeader'
 import AreasManager from './AreasManager'
 import LogoutButton from './LogoutButton'
+import AccountInfo from './AccountInfo'
 
-export default async function SettingsPage() {
-  const supabase = await createClient()
-  const [{ data: areas }, { data: { user } }] = await Promise.all([
-    supabase.from('areas').select('*').order('name'),
-    supabase.auth.getUser(),
-  ])
-
+export default function SettingsPage() {
   return (
     <div>
       <PageHeader title="Impostazioni" />
@@ -18,12 +12,12 @@ export default async function SettingsPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
             Aree di responsabilità
           </h2>
-          <AreasManager initialAreas={areas ?? []} />
+          <AreasManager />
         </section>
 
         <section className="pt-4 border-t space-y-3" style={{ borderColor: 'var(--border)' }}>
           <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Account</h2>
-          <p className="text-sm" style={{ color: 'var(--foreground)' }}>{user?.email}</p>
+          <AccountInfo />
           <LogoutButton />
         </section>
       </div>

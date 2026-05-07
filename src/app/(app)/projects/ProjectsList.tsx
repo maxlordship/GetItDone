@@ -1,19 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, ChevronRight, Calendar } from 'lucide-react'
 import type { Project, Area } from '@/types/database'
 import AddProjectModal from './AddProjectModal'
+import { SkeletonList } from '@/components/ui/Skeleton'
 
 interface ProjectWithArea extends Project {
   areas?: { name: string; color: string } | null
 }
 
-export default function ProjectsList({ initialProjects, areas }: { initialProjects: ProjectWithArea[], areas: Area[] }) {
-  const [projects, setProjects] = useState(initialProjects)
+export default function ProjectsList() {
+  const [projects, setProjects] = useState<ProjectWithArea[]>([])
+  const [areas, setAreas] = useState<Area[]>([])
+  const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [areaFilter, setAreaFilter] = useState('all')
+
+  useEffect(() => {
+    const supabase = createClient()
+    Promise.all([
+      supabase
+        .from('projects')
+        .select('*, areas(name, color)')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false }),
+      supabase.from('areas').select('*').order('name'),
+    ]).then(([{ data: p }, { data: a }]) => {
+      setProjects(p ?? [])
+      setAreas(a ?? [])
+      setLoading(false)
+    })
+  }, [])
 
   function handleAdded(project: ProjectWithArea) {
     setProjects((prev) => [project, ...prev])
@@ -22,9 +41,10 @@ export default function ProjectsList({ initialProjects, areas }: { initialProjec
 
   const filtered = areaFilter === 'all' ? projects : projects.filter((p) => p.area_id === areaFilter)
 
+  if (loading) return <SkeletonList rows={5} />
+
   return (
     <div>
-      {/* Filtri area + bottone aggiungi */}
       <div className="flex items-center gap-2 px-4 md:px-6 py-3 border-b overflow-x-auto scrollbar-none" style={{ borderColor: 'var(--border)' }}>
         <button
           onClick={() => setAreaFilter('all')}
@@ -71,11 +91,7 @@ export default function ProjectsList({ initialProjects, areas }: { initialProjec
       ) : (
         <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
           {filtered.map((project) => (
-            <li
-              key={project.id}
-              className="flex items-center gap-3 px-4 py-3.5"
-              style={{ background: 'var(--surface)' }}
-            >
+            <li key={project.id} className="flex items-center gap-3 px-4 py-3.5" style={{ background: 'var(--surface)' }}>
               {project.areas && (
                 <div className="w-2 h-10 rounded-full shrink-0" style={{ background: project.areas.color }} />
               )}
@@ -100,11 +116,7 @@ export default function ProjectsList({ initialProjects, areas }: { initialProjec
       )}
 
       {showAdd && (
-        <AddProjectModal
-          areas={areas}
-          onDone={handleAdded}
-          onClose={() => setShowAdd(false)}
-        />
+        <AddProjectModal areas={areas} onDone={handleAdded} onClose={() => setShowAdd(false)} />
       )}
     </div>
   )

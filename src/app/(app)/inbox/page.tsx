@@ -1,21 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
-import PageHeader from '@/components/layout/PageHeader'
 import InboxList from './InboxList'
+import PageHeader from '@/components/layout/PageHeader'
 
-export default async function InboxPage() {
-  const supabase = await createClient()
-  const { data: items } = await supabase
-    .from('inbox')
-    .select('*')
-    .order('created_at', { ascending: false })
-
+export default function InboxPage() {
   return (
     <div>
-      <PageHeader
-        title="Inbox"
-        subtitle={items?.length ? `${items.length} elementi da processare` : 'Inbox vuota — ottimo lavoro!'}
-      />
-      <InboxList initialItems={items ?? []} />
+      <PageHeader title="Inbox" subtitle=" " />
+      <InboxList />
     </div>
   )
 }

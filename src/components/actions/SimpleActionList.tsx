@@ -1,29 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Circle } from 'lucide-react'
-import type { Action } from '@/types/database'
+import type { Action, ActionType } from '@/types/database'
+import { SkeletonList } from '@/components/ui/Skeleton'
 
 interface ActionWithArea extends Action {
   areas?: { name: string; color: string } | null
 }
 
 interface Props {
-  initialActions: ActionWithArea[]
+  type: ActionType
   emptyIcon: string
   emptyText: string
   showDelegatedTo?: boolean
 }
 
-export default function SimpleActionList({ initialActions, emptyIcon, emptyText, showDelegatedTo }: Props) {
-  const [actions, setActions] = useState(initialActions)
+export default function SimpleActionList({ type, emptyIcon, emptyText, showDelegatedTo }: Props) {
+  const [actions, setActions] = useState<ActionWithArea[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    createClient()
+      .from('actions')
+      .select('*, areas(name, color)')
+      .eq('type', type)
+      .eq('completed', false)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setActions(data ?? [])
+        setLoading(false)
+      })
+  }, [type])
 
   async function markDone(id: string) {
-    const supabase = createClient()
-    await supabase.from('actions').update({ completed: true, completed_at: new Date().toISOString() }).eq('id', id)
+    await createClient().from('actions').update({ completed: true, completed_at: new Date().toISOString() }).eq('id', id)
     setActions((prev) => prev.filter((a) => a.id !== id))
   }
+
+  if (loading) return <SkeletonList rows={4} />
 
   if (actions.length === 0) {
     return (
