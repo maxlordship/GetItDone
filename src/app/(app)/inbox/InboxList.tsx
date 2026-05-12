@@ -12,7 +12,7 @@ export default function InboxList() {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState<InboxItem | null>(null)
 
-  useEffect(() => {
+  function fetchItems() {
     createClient()
       .from('inbox')
       .select('*')
@@ -21,6 +21,12 @@ export default function InboxList() {
         setItems(data ?? [])
         setLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchItems()
+    window.addEventListener('inbox-updated', fetchItems)
+    return () => window.removeEventListener('inbox-updated', fetchItems)
   }, [])
 
   async function handleDelete(id: string) {

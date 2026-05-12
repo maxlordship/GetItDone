@@ -21,6 +21,7 @@ export default function QuickCapture({ onClose }: { onClose: () => void }) {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       await supabase.from('inbox').insert({ title: title.trim(), notes: notes.trim() || null, user_id: user.id })
+      window.dispatchEvent(new CustomEvent('inbox-updated'))
     }
     setSaving(false)
     onClose()
