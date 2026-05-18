@@ -13,12 +13,14 @@ import {
   Plus,
   ClipboardCheck,
   GitBranch,
+  LayoutDashboard,
 } from 'lucide-react'
 import { useState } from 'react'
 import QuickCapture from '@/components/inbox/QuickCapture'
 import { ToastProvider } from '@/components/ui/Toast'
 
 const navItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/inbox', label: 'Inbox', icon: Inbox },
   { href: '/next-actions', label: 'Prossime', icon: Zap },
   { href: '/projects', label: 'Progetti', icon: FolderKanban },
