@@ -11,6 +11,8 @@ import {
   Sparkles,
   Settings,
   Plus,
+  ClipboardCheck,
+  GitBranch,
 } from 'lucide-react'
 import { useState } from 'react'
 import QuickCapture from '@/components/inbox/QuickCapture'
@@ -23,6 +25,7 @@ const navItems = [
   { href: '/calendar', label: 'Calendario', icon: Calendar },
   { href: '/waiting', label: 'In attesa', icon: Clock },
   { href: '/someday', label: 'Prima o poi', icon: Sparkles },
+  { href: '/weekly-review', label: 'Review', icon: ClipboardCheck },
 ]
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -66,6 +69,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Plus size={16} />
             Cattura rapida
           </button>
+          <Link
+            href="/gtd-flow"
+            className="mt-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors"
+            style={{ color: 'var(--muted)' }}
+          >
+            <GitBranch size={16} />
+            Flusso GTD
+          </Link>
           <Link
             href="/settings"
             className="mt-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors"
