@@ -7,13 +7,15 @@ Consultabile da desktop e mobile. Accesso protetto tramite autenticazione.
 ## Stack
 - **Next.js 16** (App Router, `src/` directory) + TypeScript — usa `src/proxy.ts` (non middleware.ts, deprecato in v16)
 - **Tailwind CSS v4**
-- **Supabase** — PostgreSQL database + Auth (magic link)
-- **Vercel** — deploy
+- **Supabase** — PostgreSQL database + Auth (email/password + password reset)
+- **Netlify** — deploy
 
 ## Architettura Auth
-- Supabase Auth con **magic link** (niente password)
+- Supabase Auth con **email/password** (+ flusso reset password via email)
 - **Row Level Security (RLS)** su tutte le tabelle: ogni utente vede solo i propri dati
-- Middleware Next.js che reindirizza al login se non autenticato
+- `src/proxy.ts` reindirizza al login se non autenticato (sostituisce middleware.ts, deprecato in v16)
+- `src/app/auth/callback/route.ts` gestisce sia PKCE (`?code=`) che OTP (`?token_hash=`)
+- Cookie scritti direttamente sulla `NextResponse.redirect()` nel callback (non via `next/headers`)
 - Progettato per multi-utente fin dall'inizio
 
 ## Schema Database
@@ -69,27 +71,32 @@ Consultabile da desktop e mobile. Accesso protetto tramite autenticazione.
 | Percorso | Descrizione |
 |----------|-------------|
 | `/` | Dashboard / redirect |
-| `/inbox` | Cattura rapida, svuota inbox |
-| `/projects` | Lista progetti per area |
+| `/inbox` | Cattura rapida, svuota inbox — modifica inline titolo/note |
+| `/projects` | Lista progetti per area con filtro |
+| `/projects/[id]` | Dettaglio progetto: azioni, completamento, sezione completate collassabile |
 | `/next-actions` | Azioni prossime, filtro contesto/area |
-| `/calendar` | Vista mensile azioni schedulate |
+| `/calendar` | Vista mensile azioni schedulate, lunedì come primo giorno |
 | `/waiting` | In attesa / delegato |
 | `/someday` | Prima o poi |
-| `/weekly-review` | Checklist guidata GTD settimanale |
+| `/weekly-review` | Checklist guidata GTD settimanale in 7 step con dati reali |
+| `/gtd-flow` | Diagramma di flusso GTD interattivo in italiano |
 | `/settings` | Aree, contesti, profilo |
-| `/login` | Magic link login |
+| `/login` | Login email/password + reset password |
+| `/auth/reset` | Pagina cambio password dopo reset |
 
 ## Principi UI/UX
-- **Mobile-first**: navigazione bottom bar su mobile, sidebar su desktop
-- Design pulito e minimalista, gradevole ma non sovraccarico
-- Cattura rapida inbox accessibile ovunque (floating button su mobile)
-- Ogni azione modificabile inline dove possibile
+- **Mobile-first**: navigazione bottom bar su mobile (5 voci), sidebar su desktop
+- Design pulito e minimalista con CSS custom properties (`--background`, `--surface`, `--accent`, ecc.)
+- Cattura rapida inbox accessibile ovunque (FAB su mobile, pulsante sidebar su desktop)
+- Navigazione istantanea: `loading.tsx` + client-side fetching con `useEffect`
+- Toast feedback (`src/components/ui/Toast.tsx`) — singleton, chiamabile con `toast('messaggio')`
+- Aggiornamenti cross-componente via `CustomEvent` (es. `inbox-updated` dopo quick capture)
 
 ## Convenzioni codice
-- Tutti i componenti in `src/components/`
-- Le Server Actions in `src/app/actions/`
-- Il client Supabase in `src/lib/supabase/`
-- Tipi TypeScript generati da Supabase in `src/types/database.ts`
+- Componenti UI in `src/components/`
+- Client Supabase in `src/lib/supabase/` — **senza generic `<Database>`** (causa `never` con `moduleResolution: "bundler"`)
+- Tipi in `src/types/database.ts` — interfacce flat (Area, Project, Action, InboxItem)
+- Formattazione date in italiano: usare `src/lib/dateIt.ts` — **mai** `toLocaleDateString`/`toLocaleTimeString` (dipende dalla lingua del browser)
 - Nessun commento salvo per logica non ovvia
 
 ## Aggiornamento CLAUDE.md
