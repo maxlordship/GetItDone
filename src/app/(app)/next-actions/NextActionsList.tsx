@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Circle } from 'lucide-react'
+import { Circle, Pencil } from 'lucide-react'
 import type { Action, Area } from '@/types/database'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import { toast } from '@/components/ui/Toast'
+import ActionEditModal from '@/components/actions/ActionEditModal'
 
 const CONTEXTS = ['tutti', '@casa', '@lavoro', '@telefono', '@computer', '@commissioni', '@lettura']
 
@@ -20,6 +21,7 @@ export default function NextActionsList() {
   const [loading, setLoading] = useState(true)
   const [contextFilter, setContextFilter] = useState('tutti')
   const [areaFilter, setAreaFilter] = useState('all')
+  const [editing, setEditing] = useState<ActionWithRelations | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -45,6 +47,10 @@ export default function NextActionsList() {
       .eq('id', id)
     setActions((prev) => prev.filter((a) => a.id !== id))
     toast(`✓ "${title}" completata`)
+  }
+
+  function handleSaved(id: string, updates: Partial<Action>) {
+    setActions((prev) => prev.map((a) => a.id === id ? { ...a, ...updates } : a))
   }
 
   const filtered = actions.filter((a) => {
@@ -131,7 +137,7 @@ export default function NextActionsList() {
           </p>
           <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
             {filtered.map((action) => (
-              <li key={action.id} className="flex items-start gap-3 px-4 py-3" style={{ background: 'var(--surface)' }}>
+              <li key={action.id} className="flex items-start gap-3 px-4 py-3 group" style={{ background: 'var(--surface)' }}>
                 <button
                   onClick={() => toggleComplete(action.id, action.title)}
                   className="mt-0.5 shrink-0 transition-colors"
@@ -159,10 +165,26 @@ export default function NextActionsList() {
                     )}
                   </div>
                 </div>
+                <button
+                  onClick={() => setEditing(action)}
+                  className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  style={{ color: 'var(--muted)' }}
+                  title="Modifica"
+                >
+                  <Pencil size={14} />
+                </button>
               </li>
             ))}
           </ul>
         </>
+      )}
+
+      {editing && (
+        <ActionEditModal
+          action={editing}
+          onSave={(updates) => handleSaved(editing.id, updates)}
+          onClose={() => setEditing(null)}
+        />
       )}
     </div>
   )

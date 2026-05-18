@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Trash2, ArrowRight } from 'lucide-react'
+import { Trash2, ArrowRight, Pencil } from 'lucide-react'
 import type { InboxItem } from '@/types/database'
 import { formatDateTimeShort } from '@/lib/dateIt'
 import ProcessModal from './ProcessModal'
@@ -96,7 +96,7 @@ function InboxItemRow({
 
   return (
     <li className="flex items-start gap-3 px-4 py-3 group border-b" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
-      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setEditing(true)}>
+      <div className="flex-1 min-w-0">
         <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{item.title}</p>
         {item.notes && (
           <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--muted)' }}>{item.notes}</p>
@@ -106,6 +106,14 @@ function InboxItemRow({
         </p>
       </div>
       <div className="flex items-center gap-1 shrink-0">
+        <button
+          onClick={() => setEditing(true)}
+          className="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ color: 'var(--muted)' }}
+          title="Modifica"
+        >
+          <Pencil size={14} />
+        </button>
         <button onClick={() => onProcess(item)} className="p-2 rounded-lg" style={{ color: 'var(--accent)' }} title="Processa">
           <ArrowRight size={16} />
         </button>
