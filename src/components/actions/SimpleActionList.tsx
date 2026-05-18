@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Circle } from 'lucide-react'
 import type { Action, ActionType } from '@/types/database'
 import { SkeletonList } from '@/components/ui/Skeleton'
+import { toast } from '@/components/ui/Toast'
 
 interface ActionWithArea extends Action {
   areas?: { name: string; color: string } | null
@@ -34,9 +35,10 @@ export default function SimpleActionList({ type, emptyIcon, emptyText, showDeleg
       })
   }, [type])
 
-  async function markDone(id: string) {
+  async function markDone(id: string, title: string) {
     await createClient().from('actions').update({ completed: true, completed_at: new Date().toISOString() }).eq('id', id)
     setActions((prev) => prev.filter((a) => a.id !== id))
+    toast(`✓ "${title}" completata`)
   }
 
   if (loading) return <SkeletonList rows={4} />
@@ -54,7 +56,7 @@ export default function SimpleActionList({ type, emptyIcon, emptyText, showDeleg
     <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
       {actions.map((action) => (
         <li key={action.id} className="flex items-start gap-3 px-4 py-3" style={{ background: 'var(--surface)' }}>
-          <button onClick={() => markDone(action.id)} className="mt-0.5 shrink-0" style={{ color: 'var(--border)' }}>
+          <button onClick={() => markDone(action.id, action.title)} className="mt-0.5 shrink-0" style={{ color: 'var(--border)' }}>
             <Circle size={20} />
           </button>
           <div className="flex-1 min-w-0">

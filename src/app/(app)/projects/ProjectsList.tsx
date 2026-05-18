@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 import { Plus, ChevronRight, Calendar } from 'lucide-react'
 import type { Project, Area } from '@/types/database'
 import AddProjectModal from './AddProjectModal'
@@ -91,7 +92,8 @@ export default function ProjectsList() {
       ) : (
         <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
           {filtered.map((project) => (
-            <li key={project.id} className="flex items-center gap-3 px-4 py-3.5" style={{ background: 'var(--surface)' }}>
+            <li key={project.id} style={{ background: 'var(--surface)' }}>
+            <Link href={`/projects/${project.id}`} className="flex items-center gap-3 px-4 py-3.5">
               {project.areas && (
                 <div className="w-2 h-10 rounded-full shrink-0" style={{ background: project.areas.color }} />
               )}
@@ -110,6 +112,7 @@ export default function ProjectsList() {
                 </div>
               </div>
               <ChevronRight size={16} style={{ color: 'var(--border)' }} />
+            </Link>
             </li>
           ))}
         </ul>

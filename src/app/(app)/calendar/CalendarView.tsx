@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Action } from '@/types/database'
+import { toast } from '@/components/ui/Toast'
 
 interface ActionWithRelations extends Action {
   areas?: { name: string; color: string } | null
@@ -69,9 +70,10 @@ export default function CalendarView() {
     setSelected(null)
   }
 
-  async function markDone(id: string) {
+  async function markDone(id: string, title: string) {
     await createClient().from('actions').update({ completed: true, completed_at: new Date().toISOString() }).eq('id', id)
     setActions((prev) => prev.filter((a) => a.id !== id))
+    toast(`✓ "${title}" completata`)
   }
 
   const selectedActions = selected ? (actionsByDay[selected] ?? []) : []
@@ -152,7 +154,7 @@ export default function CalendarView() {
             <ul className="space-y-2">
               {selectedActions.map((action) => (
                 <li key={action.id} className="flex items-start gap-3 p-3 rounded-xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-                  <button onClick={() => markDone(action.id)} style={{ color: 'var(--border)' }} className="mt-0.5 shrink-0">
+                  <button onClick={() => markDone(action.id, action.title)} style={{ color: 'var(--border)' }} className="mt-0.5 shrink-0">
                     <CheckCircle2 size={18} />
                   </button>
                   <div className="flex-1 min-w-0">

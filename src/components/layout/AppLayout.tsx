@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import QuickCapture from '@/components/inbox/QuickCapture'
+import { ToastProvider } from '@/components/ui/Toast'
 
 const navItems = [
   { href: '/inbox', label: 'Inbox', icon: Inbox },
@@ -113,6 +114,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Quick capture modal */}
       {showCapture && <QuickCapture onClose={() => setShowCapture(false)} />}
+      <ToastProvider />
     </div>
   )
 }

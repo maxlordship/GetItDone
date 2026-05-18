@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Circle } from 'lucide-react'
 import type { Action, Area } from '@/types/database'
 import { SkeletonList } from '@/components/ui/Skeleton'
+import { toast } from '@/components/ui/Toast'
 
 const CONTEXTS = ['tutti', '@casa', '@lavoro', '@telefono', '@computer', '@commissioni', '@lettura']
 
@@ -37,12 +38,13 @@ export default function NextActionsList() {
     })
   }, [])
 
-  async function toggleComplete(id: string) {
+  async function toggleComplete(id: string, title: string) {
     await createClient()
       .from('actions')
       .update({ completed: true, completed_at: new Date().toISOString() })
       .eq('id', id)
     setActions((prev) => prev.filter((a) => a.id !== id))
+    toast(`✓ "${title}" completata`)
   }
 
   const filtered = actions.filter((a) => {
@@ -131,7 +133,7 @@ export default function NextActionsList() {
             {filtered.map((action) => (
               <li key={action.id} className="flex items-start gap-3 px-4 py-3" style={{ background: 'var(--surface)' }}>
                 <button
-                  onClick={() => toggleComplete(action.id)}
+                  onClick={() => toggleComplete(action.id, action.title)}
                   className="mt-0.5 shrink-0 transition-colors"
                   style={{ color: 'var(--border)' }}
                 >
