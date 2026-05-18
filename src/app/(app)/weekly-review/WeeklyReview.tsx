@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, Circle, ChevronRight, ChevronLeft, Inbox, Zap, FolderKanban, Clock, Sparkles, Calendar, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import type { Action, Project, InboxItem } from '@/types/database'
+import type { Action, Project } from '@/types/database'
+import { formatWeekdayDateShort } from '@/lib/dateIt'
 
 interface ReviewData {
   inboxCount: number
@@ -192,7 +193,7 @@ const STEPS: Step[] = [
               <div key={a.id} className="flex items-center justify-between py-1.5">
                 <span className="text-sm" style={{ color: 'var(--foreground)' }}>{a.title}</span>
                 <span className="text-xs" style={{ color: 'var(--muted)' }}>
-                  {a.scheduled_at ? new Date(a.scheduled_at).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}
+                  {a.scheduled_at ? formatWeekdayDateShort(a.scheduled_at) : ''}
                 </span>
               </div>
             ))}

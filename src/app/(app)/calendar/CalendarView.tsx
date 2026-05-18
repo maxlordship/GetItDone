@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Action } from '@/types/database'
+import { formatTime } from '@/lib/dateIt'
 import { toast } from '@/components/ui/Toast'
 
 interface ActionWithRelations extends Action {
@@ -161,7 +162,7 @@ export default function CalendarView() {
                     <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{action.title}</p>
                     {action.scheduled_at && (
                       <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
-                        {new Date(action.scheduled_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(action.scheduled_at!)}
                       </p>
                     )}
                   </div>

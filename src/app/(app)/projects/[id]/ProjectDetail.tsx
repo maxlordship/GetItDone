@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Circle, CheckCircle2, Calendar, Tag } from 'lucide-react'
 import type { Project, Action, Area } from '@/types/database'
 import { toast } from '@/components/ui/Toast'
+import { formatDateShort, formatDateLong } from '@/lib/dateIt'
 import { SkeletonList } from '@/components/ui/Skeleton'
 
 interface ProjectWithArea extends Project {
@@ -128,7 +129,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
                 {project.due_date && (
                   <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--muted)' }}>
                     <Calendar size={11} />
-                    {new Date(project.due_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}
+                    {formatDateLong(project.due_date)}
                   </span>
                 )}
                 <span className="text-xs" style={{ color: 'var(--muted)' }}>{pending.length} azioni rimaste</span>
@@ -313,7 +314,7 @@ function ActionRow({ action, onToggle }: { action: ActionWithDetails; onToggle: 
           {action.scheduled_at && (
             <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--muted)' }}>
               <Calendar size={10} />
-              {new Date(action.scheduled_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+              {formatDateShort(action.scheduled_at)}
             </span>
           )}
         </div>

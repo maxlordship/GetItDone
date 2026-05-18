@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Plus, ChevronRight, Calendar } from 'lucide-react'
 import type { Project, Area } from '@/types/database'
+import { formatDateShort } from '@/lib/dateIt'
 import AddProjectModal from './AddProjectModal'
 import { SkeletonList } from '@/components/ui/Skeleton'
 
@@ -106,7 +107,7 @@ export default function ProjectsList() {
                   {project.due_date && (
                     <span className="text-xs flex items-center gap-0.5" style={{ color: 'var(--muted)' }}>
                       <Calendar size={11} />
-                      {new Date(project.due_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+                      {formatDateShort(project.due_date)}
                     </span>
                   )}
                 </div>

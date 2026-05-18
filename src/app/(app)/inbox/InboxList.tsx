@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Trash2, ArrowRight } from 'lucide-react'
 import type { InboxItem } from '@/types/database'
+import { formatDateTimeShort } from '@/lib/dateIt'
 import ProcessModal from './ProcessModal'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import { toast } from '@/components/ui/Toast'
@@ -101,7 +102,7 @@ function InboxItemRow({
           <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--muted)' }}>{item.notes}</p>
         )}
         <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
-          {new Date(item.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          {formatDateTimeShort(item.created_at)}
         </p>
       </div>
       <div className="flex items-center gap-1 shrink-0">

@@ -1,163 +1,152 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowDown, ArrowRight } from 'lucide-react'
 
-function Box({ children, color = 'surface', className = '' }: { children: React.ReactNode; color?: 'surface' | 'accent' | 'success' | 'danger' | 'muted'; className?: string }) {
-  const styles: Record<string, React.CSSProperties> = {
-    surface: { background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--foreground)' },
-    accent: { background: 'var(--accent)', borderColor: 'var(--accent)', color: '#fff' },
-    success: { background: 'var(--success)', borderColor: 'var(--success)', color: '#fff' },
-    danger: { background: 'var(--danger)', borderColor: 'var(--danger)', color: '#fff' },
-    muted: { background: 'var(--background)', borderColor: 'var(--border)', color: 'var(--muted)' },
+type BoxVariant = 'input' | 'decision' | 'action' | 'destination' | 'note'
+
+function FlowBox({ children, variant = 'action' }: { children: React.ReactNode; variant?: BoxVariant }) {
+  const styles: Record<BoxVariant, React.CSSProperties> = {
+    input:       { background: 'var(--accent)',      color: '#fff',              borderColor: 'var(--accent)' },
+    decision:    { background: 'var(--accent-soft)', color: 'var(--accent)',     borderColor: 'var(--accent)', fontWeight: 600 },
+    action:      { background: 'var(--surface)',     color: 'var(--foreground)', borderColor: 'var(--border)' },
+    destination: { background: 'var(--background)',  color: 'var(--muted)',      borderColor: 'var(--border)' },
+    note:        { background: 'transparent',        color: 'var(--muted)',      borderColor: 'transparent' },
   }
+  const shape = variant === 'decision' ? 'rounded-2xl' : 'rounded-xl'
   return (
     <div
-      className={`rounded-xl border px-4 py-3 text-sm font-medium text-center leading-snug ${className}`}
-      style={styles[color]}
+      className={`border px-4 py-2.5 text-sm text-center leading-snug ${shape}`}
+      style={styles[variant]}
     >
       {children}
     </div>
   )
 }
 
-function Diamond({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative flex items-center justify-center my-1">
-      <div
-        className="w-40 h-40 rotate-45 border-2 flex items-center justify-center"
-        style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent)' }}
-      >
-        <div className="-rotate-45 text-center px-2">
-          <p className="text-xs font-semibold leading-tight" style={{ color: 'var(--accent)' }}>{children}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function Arrow({ label, horizontal }: { label?: string; horizontal?: boolean }) {
-  if (horizontal) {
-    return (
-      <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--muted)' }}>
-        {label && <span>{label}</span>}
-        <ArrowRight size={14} />
-      </div>
-    )
-  }
+function Arrow({ label, color }: { label?: string; color?: string }) {
   return (
     <div className="flex flex-col items-center gap-0.5 my-0.5">
-      <ArrowDown size={14} style={{ color: 'var(--muted)' }} />
-      {label && <span className="text-xs" style={{ color: 'var(--muted)' }}>{label}</span>}
+      <div className="w-px h-4" style={{ background: 'var(--border)' }} />
+      {label && (
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: color ?? 'var(--muted)', background: color ? color + '18' : 'var(--background)' }}>
+          {label}
+        </span>
+      )}
     </div>
   )
 }
 
-function Row({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`flex items-center gap-3 ${className}`}>{children}</div>
+function Branch({ left, right }: {
+  left: { label: string; color: string; children: React.ReactNode }
+  right: { label: string; color: string; children: React.ReactNode }
+}) {
+  return (
+    <div className="w-full flex gap-3 my-1">
+      {/* Left branch */}
+      <div className="flex-1 flex flex-col items-center gap-1">
+        <div className="w-px h-3" style={{ background: 'var(--border)' }} />
+        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: left.color, background: left.color + '18' }}>{left.label}</span>
+        {left.children}
+      </div>
+      {/* Divider */}
+      <div className="w-px self-stretch" style={{ background: 'var(--border)' }} />
+      {/* Right branch */}
+      <div className="flex-1 flex flex-col items-center gap-1">
+        <div className="w-px h-3" style={{ background: 'var(--border)' }} />
+        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: right.color, background: right.color + '18' }}>{right.label}</span>
+        {right.children}
+      </div>
+    </div>
+  )
 }
 
 export default function GtdFlowPage() {
   return (
-    <div className="max-w-lg mx-auto px-4 py-6">
+    <div className="max-w-md mx-auto px-4 py-6">
       <div className="mb-6">
         <h1 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>Flusso GTD</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>Come decidere cosa fare con ogni cosa che catturi</p>
       </div>
 
-      <div className="flex flex-col items-center gap-0 text-sm">
+      <div className="flex flex-col items-center">
 
-        {/* Capture */}
-        <Box color="accent" className="w-48">📥 Cattura</Box>
+        {/* Step 1: Capture */}
+        <FlowBox variant="input">📥 Cattura nell&apos;Inbox</FlowBox>
         <Arrow label="Chiediti:" />
 
-        {/* Is it actionable? */}
-        <Diamond>È qualcosa<br />che richiede<br />un&apos;azione?</Diamond>
+        {/* Q1: Actionable? */}
+        <FlowBox variant="decision">È qualcosa che richiede un&apos;azione?</FlowBox>
 
-        {/* NO branch */}
-        <div className="w-full flex justify-between items-start gap-2 -mt-4">
-          {/* NO */}
-          <div className="flex flex-col items-center gap-1 w-36">
-            <span className="text-xs font-semibold" style={{ color: 'var(--danger)' }}>NO</span>
-            <Arrow />
+        <Branch
+          left={{ label: 'NO', color: 'var(--muted)' as string, children: (
             <div className="flex flex-col gap-2 w-full">
-              <Box color="muted">🗑 Elimina</Box>
-              <Box color="muted">📦 Archivio<br /><span className="text-xs font-normal">(riferimento futuro)</span></Box>
-              <Box color="muted">💡 Prima o poi<br /><span className="text-xs font-normal">(forse un giorno)</span></Box>
+              <FlowBox variant="destination">🗑 Elimina</FlowBox>
+              <FlowBox variant="destination">📦 Archivio<br /><span style={{ fontSize: 11 }}>riferimento futuro</span></FlowBox>
+              <FlowBox variant="destination">💡 Prima o poi<br /><span style={{ fontSize: 11 }}>forse un giorno</span></FlowBox>
             </div>
-          </div>
+          )}}
+          right={{ label: 'SÌ', color: '#16a34a', children: (
+            <div className="flex flex-col items-center gap-1 w-full">
+              <FlowBox variant="note">Qual è la prossima azione concreta?</FlowBox>
 
-          {/* YES */}
-          <div className="flex flex-col items-center gap-1 flex-1">
-            <span className="text-xs font-semibold" style={{ color: 'var(--success)' }}>SÌ</span>
-            <Arrow label="Qual è la prossima azione?" />
+              {/* Q2: 2 min rule */}
+              <FlowBox variant="decision">Richiede meno di 2 minuti?</FlowBox>
 
-            <Diamond>Ci vuole<br />meno di<br />2 minuti?</Diamond>
+              <Branch
+                left={{ label: 'SÌ', color: '#16a34a', children: (
+                  <FlowBox variant="action">✅ Fallo subito!</FlowBox>
+                )}}
+                right={{ label: 'NO', color: 'var(--muted)' as string, children: (
+                  <div className="flex flex-col items-center gap-1 w-full">
+                    {/* Q3: Delegate? */}
+                    <FlowBox variant="decision">Devi farlo tu?</FlowBox>
 
-            {/* 2min YES */}
-            <div className="w-full flex flex-col items-center gap-1 mt-1">
-              <Row>
-                <Arrow label="SÌ" horizontal />
-                <Box color="success" className="shrink-0">✅ Fallo<br />subito!</Box>
-              </Row>
-            </div>
+                    <Branch
+                      left={{ label: 'NO', color: 'var(--muted)' as string, children: (
+                        <FlowBox variant="destination">👤 Delega<br /><span style={{ fontSize: 11 }}>→ In attesa</span></FlowBox>
+                      )}}
+                      right={{ label: 'SÌ', color: '#16a34a', children: (
+                        <div className="flex flex-col items-center gap-1 w-full">
+                          {/* Q4: Date? */}
+                          <FlowBox variant="decision">Ha una data precisa?</FlowBox>
 
-            <Arrow label="NO" />
-
-            <Diamond>Devi<br />farlo tu<br />stesso?</Diamond>
-
-            <div className="w-full flex justify-between gap-2 mt-1">
-              {/* Delegate */}
-              <div className="flex flex-col items-center gap-1 w-32">
-                <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>NO</span>
-                <Arrow />
-                <Box color="muted" className="w-full">👤 Delega<br /><span className="text-xs font-normal">→ In attesa</span></Box>
-              </div>
-
-              {/* Defer */}
-              <div className="flex flex-col items-center gap-1 flex-1">
-                <span className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>SÌ</span>
-                <Arrow />
-
-                <Diamond>Ha una<br />data<br />precisa?</Diamond>
-
-                <div className="w-full flex justify-between gap-2 mt-1">
-                  <div className="flex flex-col items-center gap-1 w-28">
-                    <span className="text-xs" style={{ color: 'var(--muted)' }}>SÌ</span>
-                    <Arrow />
-                    <Box color="muted" className="w-full">📅 Agenda<br /><span className="text-xs font-normal">(Calendario)</span></Box>
+                          <Branch
+                            left={{ label: 'SÌ', color: '#16a34a', children: (
+                              <FlowBox variant="destination">📅 Calendario</FlowBox>
+                            )}}
+                            right={{ label: 'NO', color: 'var(--muted)' as string, children: (
+                              <FlowBox variant="destination">⚡ Prossime azioni</FlowBox>
+                            )}}
+                          />
+                        </div>
+                      )}}
+                    />
                   </div>
-                  <div className="flex flex-col items-center gap-1 flex-1">
-                    <span className="text-xs" style={{ color: 'var(--muted)' }}>NO</span>
-                    <Arrow />
-                    <Box color="muted" className="w-full">⚡️ Prossime<br />azioni</Box>
-                  </div>
-                </div>
-              </div>
+                )}}
+              />
             </div>
-          </div>
+          )}}
+        />
+
+        {/* Multi-step note */}
+        <div className="mt-6 w-full rounded-2xl border p-4 space-y-2" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Se richiede più di un passo</p>
+          <p className="text-sm" style={{ color: 'var(--foreground)' }}>
+            📁 Crea un <strong>Progetto</strong>, poi definisci la prima azione concreta e mettila nelle <em>Prossime azioni</em>.
+          </p>
         </div>
 
-        {/* Multi-step? */}
-        <div className="mt-6 w-full border-t pt-5" style={{ borderColor: 'var(--border)' }}>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-3 text-center" style={{ color: 'var(--muted)' }}>Se richiede più passi</p>
-          <div className="flex flex-col items-center gap-1">
-            <Box color="accent" className="w-full">📁 Crea un Progetto</Box>
-            <Arrow />
-            <Box color="surface" className="w-full">Definisci la prima azione concreta e mettila nelle Prossime azioni</Box>
-          </div>
-        </div>
-
-        {/* Weekly review reminder */}
-        <div className="mt-6 w-full rounded-2xl p-4 border" style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent)' }}>
-          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--accent)' }}>🔄 Weekly Review</p>
+        {/* Weekly review */}
+        <div className="mt-4 w-full rounded-2xl border p-4" style={{ background: 'var(--accent-soft)', borderColor: 'var(--accent)' }}>
+          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--accent)' }}>🔄 Weekly Review — ogni settimana</p>
           <p className="text-xs" style={{ color: 'var(--foreground)' }}>
-            Ogni settimana, rivedi tutti i tuoi elenchi: inbox a zero, prossime azioni aggiornate, ogni progetto con almeno una prossima azione.
+            Inbox a zero · ogni progetto con almeno una prossima azione · prossime azioni aggiornate · in attesa verificata.
           </p>
           <Link href="/weekly-review" className="inline-block mt-2 text-xs font-semibold" style={{ color: 'var(--accent)' }}>
             Vai alla Review →
           </Link>
         </div>
+
       </div>
     </div>
   )
